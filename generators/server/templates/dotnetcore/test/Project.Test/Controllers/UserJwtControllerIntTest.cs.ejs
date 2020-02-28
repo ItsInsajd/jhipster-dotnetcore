@@ -16,17 +16,22 @@ using FluentAssertions;
 using FluentAssertions.Json;
 using <%= namespace %>.Models;
 using <%= namespace %>.Models.Vm;
+<%_ if (databaseType === 'mongo') { _%>using <%= namespace %>.Test.Infrastructure;<%_ } _%>
 using <%= namespace %>.Test.Setup;
 using Microsoft.AspNetCore.Identity;
+<%_ if (databaseType === 'mongo') { _%>using MongoDB.Driver;<%_ } _%>
 using Newtonsoft.Json.Linq;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace <%= namespace %>.Test.Controllers {
-    public class UserJwtControllerIntTest {
+namespace <%= namespace %>.Test.Controllers 
+{
+    public class UserJwtControllerIntTest <%_ if (databaseType === 'mongo') { _%>: IDisposable<%_ } _%>
+    {
         public UserJwtControllerIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
@@ -119,5 +124,17 @@ namespace <%= namespace %>.Test.Controllers {
             var authorization = headers.FirstOrDefault(it => it.Key == "Authorization").Value.FirstOrDefault();
             authorization.Should().NotBeNull().And.NotBeEmpty();
         }
+    <%_ if (databaseType === 'mongo') { _%>
+        
+        public void Dispose()
+        {
+            var client = new MongoClient(TestConfiguration.ConnectionString);
+
+            if (client != null)
+            {
+                client.DropDatabase(TestConfiguration.DatabaseName);
+            }
+        }
+    <%_ } _%>
     }
 }

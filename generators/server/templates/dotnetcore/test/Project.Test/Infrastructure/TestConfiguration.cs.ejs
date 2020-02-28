@@ -12,9 +12,24 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+namespace <%= namespace %>.Test.Infrastructure
 {
-    shadowCopy: false<%_ if (databaseType === 'mongo') { _%>,
-    "parallelizeAssembly": false,
-    "parallelizeTestCollections": false
-<%_ } _%>
+    public static class TestConfiguration
+    {
+        public static string ConnectionString
+        {
+            get
+            {
+                return "mongodb://localhost:27017";
+            }
+        }
+
+        public static string DatabaseName
+        {
+            get
+            {
+                return "TestDB";
+            }
+        }
+    }
 }

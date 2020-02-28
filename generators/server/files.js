@@ -682,6 +682,15 @@ const serverFiles = {
             path: SERVER_TEST_DIR,
             templates: [
                 {
+                    file: 'Project.Test/Infrastructure/TestConfiguration.cs',
+                    renameTo: generator => `${generator.testProjectDir}/Infrastructure/TestConfiguration.cs`
+                }
+            ]
+        },
+        {
+            path: SERVER_TEST_DIR,
+            templates: [
+                {
                     file: 'Project.Test/Setup/MockClaimsPrincipalProvider.cs',
                     renameTo: generator => `${generator.testProjectDir}/Infrastructure/MockClaimsPrincipalProvider.cs`
                 }

@@ -18,9 +18,12 @@ using <%= namespace %>.Models.Vm;
 using <%= namespace %>.Security;
 using <%= namespace %>.Service.Dto;
 using <%= namespace %>.Service.Mapper;
+<%_ if (databaseType === 'mongo') { _%>using <%= namespace %>.Test.Infrastructure;<%_ } _%>
 using <%= namespace %>.Test.Setup;
 using Microsoft.AspNetCore.Identity;
+<%_ if (databaseType === 'mongo') { _%>using MongoDB.Driver;<%_ } _%>
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -28,8 +31,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace <%= namespace %>.Test.Controllers {
-    public class UserResourceIntTest {
+namespace <%= namespace %>.Test.Controllers 
+{
+    public class UserResourceIntTest <%_ if (databaseType === 'mongo') { _%>: IDisposable<%_ } _%>
+    {
         public UserResourceIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
@@ -396,9 +401,12 @@ namespace <%= namespace %>.Test.Controllers {
             // Validate the User in the database
             var userList = _userManager.Users.ToList();
             userList.Count().Should().Be(databaseSizeBeforeUpdate);
-//            var testUser = userList[userList.Count - 1];
-//            TODO FIX database refresh to prevent the usage of context/Reload
+        <%_ if (databaseType === 'mongo') { _%>
+            var testUser = userList[userList.Count - 1];
+        <%_ } else { _%>
+            // TODO FIX database refresh to prevent the usage of context/Reload
             var testUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             testUser.FirstName.Should().Be(UpdatedFirstname);
             testUser.LastName.Should().Be(UpdatedLastname);
             testUser.Email.Should().Be(UpdatedEmail);
@@ -520,9 +528,12 @@ namespace <%= namespace %>.Test.Controllers {
             // Validate the User in the database
             var userList = _userManager.Users.ToList();
             userList.Count().Should().Be(databaseSizeBeforeUpdate);
-//            var testUser = userList[userList.Count - 1];
-//            TODO FIX database refresh to prevent the usage of context/Reload
+        <%_ if (databaseType === 'mongo') { _%>
+            var testUser = userList[userList.Count - 1];
+        <%_ } else { _%>
+            // TODO FIX database refresh to prevent the usage of context/Reload
             var testUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             testUser.Login.Should().Be(UpdatedLogin);
             testUser.FirstName.Should().Be(UpdatedFirstname);
             testUser.LastName.Should().Be(UpdatedLastname);
@@ -530,5 +541,17 @@ namespace <%= namespace %>.Test.Controllers {
             testUser.ImageUrl.Should().Be(UpdatedImageurl);
             testUser.LangKey.Should().Be(UpdatedLangkey);
         }
+    <%_ if (databaseType === 'mongo') { _%>
+        
+        public void Dispose()
+        {
+            var client = new MongoClient(TestConfiguration.ConnectionString);
+
+            if (client != null)
+            {
+                client.DropDatabase(TestConfiguration.DatabaseName);
+            }
+        }
+    <%_ } _%>
     }
 }

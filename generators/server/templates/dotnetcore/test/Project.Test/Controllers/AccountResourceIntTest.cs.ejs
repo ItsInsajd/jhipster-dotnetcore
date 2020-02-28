@@ -20,30 +20,27 @@ using <%= namespace %>.Models;
 using <%= namespace %>.Models.Vm;
 using <%= namespace %>.Security;
 using <%= namespace %>.Service.Dto;
+<%_ if (databaseType === 'mongo') { _%>using <%= namespace %>.Test.Infrastructure;<%_ } _%>
 using <%= namespace %>.Test.Setup;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+<%_ if (databaseType === 'mongo') { _%>using MongoDB.Driver;<%_ } _%>
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace <%= namespace %>.Test.Controllers {
-    public class AccountResourceIntTest {
+namespace <%= namespace %>.Test.Controllers 
+{
+    public class AccountResourceIntTest <%_ if (databaseType === 'mongo') { _%>: IDisposable<%_ } _%>
+    {
         public AccountResourceIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
-//            _factory.WithWebHostBuilder(builder => {
-//                var mockMailService = A.Fake<IMailService>();
-//                A.CallTo(() => mockMailService.SendActivationEmail(A<User>.Ignored)).Returns(Task.CompletedTask);
-//                builder.ConfigureServices(services => {
-//                    services.Replace(new ServiceDescriptor(typeof(IMailService), sp => mockMailService,
-//                        ServiceLifetime.Scoped));
-//                });
-//            });
         }
 
         private readonly NhipsterWebApplicationFactory<TestStartup> _factory;
@@ -70,8 +67,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             user = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             user = Fixme.ReloadUser(_factory, user);
+        <%_ } _%>
             user.Activated.Should().Be(true);
         }
 
@@ -118,8 +117,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, "new password").Should()
                 .Be(PasswordVerificationResult.Success);
         }
@@ -149,8 +150,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
         }
 
@@ -178,8 +181,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
         }
 
@@ -207,8 +212,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
         }
 
@@ -236,8 +243,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, "new password").Should()
                 .Be(PasswordVerificationResult.Failed);
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, currentPassword).Should()
@@ -271,8 +280,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, keyAndPassword.NewPassword)
                 .Should().Be(PasswordVerificationResult.Success);
         }
@@ -304,8 +315,10 @@ namespace <%= namespace %>.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, keyAndPassword.NewPassword)
                 .Should().Be(PasswordVerificationResult.Failed);
         }
@@ -761,8 +774,10 @@ namespace <%= namespace %>.Test.Controllers {
                 .ThenInclude(r => r.Role)
                 .SingleOrDefaultAsync(it => it.UserName == user.Login);
 
+        <%_ if (databaseType !== 'mongo') { _%>
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
+        <%_ } _%>
             updatedUser.FirstName.Should().Be(userDto.FirstName);
             updatedUser.LastName.Should().Be(userDto.LastName);
             updatedUser.Email.Should().Be(userDto.Email);
@@ -890,5 +905,17 @@ namespace <%= namespace %>.Test.Controllers {
             user = await userManager.FindByEmailAsync(userDto.Email);
             user.Should().BeNull();
         }
+    <%_ if (databaseType === 'mongo') { _%>
+            
+        public void Dispose()
+        {
+            var client = new MongoClient(TestConfiguration.ConnectionString);
+
+            if (client != null)
+            {
+                client.DropDatabase(TestConfiguration.DatabaseName);
+            }
+        }
+    <%_ } _%>
     }
 }

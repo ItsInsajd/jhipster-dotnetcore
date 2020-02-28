@@ -56,6 +56,10 @@ function askForServerSideOpts() {
                 {
                     value: 'oracle',
                     name: 'Oracle'
+                },
+                {
+                    value: 'mongo',
+                    name: 'MongoDB'
                 }
             ],
             default: 0
